@@ -14,7 +14,7 @@ from skimage import feature
 import statistics
 from scipy import ndimage as ndi
 
-initial  = Image.open('C:/Users/dtket/.spyder-py3/Capture.png')
+initial  = Image.open('C:/Users/dtket/.spyder-py3/pic1.jpg')
 plt.imshow(initial)
 plt.show()
 init_arr = np.array(initial)
@@ -27,13 +27,13 @@ cropped = initial.crop( ( left, top, right, bottom ) )
 crop_arr = np.array(cropped)
 gray_image = rgb2gray(crop_arr)
 
-sigma = 5     # EXPERIMENTAL PARAMETER
-edges = feature.canny(gray_image, sigma,25.5,51)
-plt.imshow(edges)
-plt.show()
-histogram = np.sum(edges[edges.shape[0]//2:,:], axis=0)
-plt.plot(histogram)
-plt.show()
+#sigma = 5     # EXPERIMENTAL PARAMETER
+#edges = feature.canny(gray_image, sigma,25.5,51)
+#plt.imshow(edges)
+#plt.show()
+#histogram = np.sum(edges[edges.shape[0]//2:,:], axis=0)
+#plt.plot(histogram)
+#plt.show()
 #plt.imshow(edges)
 #plt.show()
 
@@ -64,27 +64,27 @@ plt.show()
 plt.plot(test)
 plt.show()
 
-cray = test
 avg = 0
 count = 0
+test2 = np.empty(test.shape[0], dtype=object)
+
 
 for r in range(test.shape[0]):
-    if test[r] > 25:
-        cray[r] = 1
-        avg = avg + r
-        count = count + 1
+    if test[r] < statistics.mean(test)+30:
+        test2[r] = 0
     else:
-        cray[r] = 0
-        
-        
-avg = avg/count
-center = width/2
-plt.plot(cray)
+        test2[r] = 1
+        avg = avg + r
+        count = count + 1 
+center = test.shape[0]/2
+avg=avg/count        
+plt.plot(test2)
 plt.show()
 err = (avg - center)
 
-print("difference between camera center and track center is", err)
+print("difference between camera center and track center, followed by the average and the center is", err, avg,center)
 
-
-
+#
+#global_thresh2 = threshold_otsu(test)
+#binary_global2 = test > global_thresh2
 
