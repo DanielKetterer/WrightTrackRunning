@@ -12,7 +12,9 @@ fig,ax = plt.subplots(1)
 ax.imshow(im)
 
 # Create a Rectangle patch
-rect = patches.Rectangle((50,100),40,30,linewidth=1,edgecolor='r',facecolor='none')
+rect  = patches.Rectangle((50,100),40,30,linewidth=1,edgecolor='r',facecolor='none')
+rect2 = patches.Rectangle((xstart,ystart),xend-xstart,yend-ystart,linewidth=1,edgecolor='r',facecolor='none')
+
 
 # Add the patch to the Axes
 ax.add_patch(rect)
@@ -66,6 +68,7 @@ def sliding_window(img, nwindows=9, margin=150, minpix = 1, draw_windows=True):
 
 
 
+            out_img = patches.Rectangle((win_xleft_low,win_y_low),win_xleft_high-win_xleft_low, win_y_high-win_y_low,linewidth=1,edgecolor='r',facecolor='none')
 
 
 
