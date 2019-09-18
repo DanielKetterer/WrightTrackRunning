@@ -65,6 +65,15 @@ for num in range(190):
 
  err = track_center[0] - camera_center
 
+
+
+
+
+# Basically do the same but on a reduced set of the pixerls, ie sample every 10 or 130 or sop, we want 30 bins along the x and 10- 30 along the y
+
+
+
+
 ###PLOTTING
 # fig, axes = plt.subplots(nrows=2, figsize=(7, 8))
 # ax0, ax1 = axes
