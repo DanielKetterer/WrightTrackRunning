@@ -1,90 +1,95 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Aug 31 19:41:51 2019
+Created
 
-@author: dtket
+@author: dtketterer
 """
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-from skimage import data
-from skimage.filters import threshold_otsu, threshold_adaptive
+from scipy import ndimage
+from skimage.filters import threshold_otsu
 from skimage.color import rgb2gray
-from skimage import feature
-import statistics
-from scipy import ndimage as ndi
-
-initial  = Image.open('C:/Users/dtket/.spyder-py3/pic1.jpg')
-plt.imshow(initial)
-plt.show()
-init_arr = np.array(initial)
-#init_arr = ndi.gaussian_filter(init_arr, 10)
-height=init_arr.shape[0]
-width=init_arr.shape[1]
-crop = 85      # EXPERIMENTAL PARAMETER
-left, top, right, bottom = 0, crop, width, height
-cropped = initial.crop( ( left, top, right, bottom ) )
-crop_arr = np.array(cropped)
-gray_image = rgb2gray(crop_arr)
-
-#sigma = 5     # EXPERIMENTAL PARAMETER
-#edges = feature.canny(gray_image, sigma,25.5,51)
-#plt.imshow(edges)
-#plt.show()
-#histogram = np.sum(edges[edges.shape[0]//2:,:], axis=0)
-#plt.plot(histogram)
-#plt.show()
-#plt.imshow(edges)
-#plt.show()
+file_string_start = 'C:/Users/dtket/.spyder-py3//Photos/pic ('
+file_string_end   = ').jpg'
 
 
+def smoothTriangle(data, degree):
+    triangle=np.concatenate((np.arange(degree + 1), np.arange(degree)[::-1])) # up then down
+    smoothed=[]
+
+    for i in range(degree, len(data) - degree * 2):
+        point=data[i:i + len(triangle)] * triangle
+        smoothed.append(np.sum(point)/np.sum(triangle))
+    # Handle boundaries
+    smoothed=[smoothed[0]]*int(degree + degree/2) + smoothed
+    while len(smoothed) < len(data):
+        smoothed.append(smoothed[-1])
+    return smoothed
+
+#def func(data, center, eps):
+#    for x,y in data:
+#        if (center-eps < x < center+eps ):
+#            indicator(x,y)=1
+#        else:
+#            indicator(x,y)=0
+#    return indicator
 
 
-#PLOTTING
-global_thresh = threshold_otsu(gray_image)
-binary_global = gray_image > global_thresh
-test = np.sum(binary_global[binary_global.shape[0]//2:,:], axis=0)
-fig, axes = plt.subplots(nrows=2, figsize=(7, 8))
-ax0, ax1, = axes
-plt.gray()
-
-ax0.imshow(gray_image)
-ax0.set_title('Image')
-
-ax1.imshow(binary_global)
-ax1.set_title('Global thresholding')
+for num in range(190):
+ filename = file_string_start+str(num)+file_string_end
+ initial  = Image.open(filename)
 
 
-for ax in axes:
-    ax.axis('off')
+ init_arr       =  np.array(initial)
 
-plt.show()
-####
+ gray_image     =  rgb2gray(init_arr)
 
-plt.plot(test)
-plt.show()
+ global_thresh  =  threshold_otsu(gray_image)
 
-avg = 0
-count = 0
-test2 = np.empty(test.shape[0], dtype=object)
+ binary_global  =  gray_image > global_thresh
 
+ histogram      =  np.sum(binary_global[binary_global.shape[0]//2:,:], axis=0)
 
-for r in range(test.shape[0]):
-    if test[r] < statistics.mean(test)+30:
-        test2[r] = 0
-    else:
-        test2[r] = 1
-        avg = avg + r
-        count = count + 1 
-center = test.shape[0]/2
-avg=avg/count        
-plt.plot(test2)
-plt.show()
-err = (avg - center)
+ standard       =  np.std(histogram, axis=0)
 
-print("difference between camera center and track center, followed by the average and the center is", err, avg,center)
+ global_thresh2 =  threshold_otsu(histogram) + standard
+ 
+ binary_global2 =  histogram > global_thresh2
+ 
+# tester=smoothTriangle(histogram, 120)
+ 
+ camera_center  =  binary_global2.shape[0]/2
 
+ track_center   =  ndimage.measurements.center_of_mass(binary_global2)
+
+ err = track_center[0] - camera_center
+
+###PLOTTING
+# fig, axes = plt.subplots(nrows=2, figsize=(7, 8))
+# ax0, ax1 = axes
+# plt.gray()
 #
-#global_thresh2 = threshold_otsu(test)
-#binary_global2 = test > global_thresh2
-
+# ax0.imshow(gray_image)
+# ax0.set_title('Image')
+#
+# ax1.imshow(binary_global)
+# ax1.set_title('Global thresholding')
+#
+#
+# for ax in axes:
+#     ax.axis('off')
+#
+# plt.show()
+# plt.gray()
+# plt.imshow(binary_global)
+# plt.show()
+# plt.plot(histogram)
+# plt.show()
+ plt.plot(binary_global2)
+ plt.show()
+# plt.plot(tester)
+# plt.show()
+# plt.plot(tester2)
+# plt.show()
+ print(num,err,track_center[0],camera_center)
