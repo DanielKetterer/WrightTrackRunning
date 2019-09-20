@@ -14,34 +14,14 @@ file_string_start = 'C:/Users/dtket/.spyder-py3//Photos/pic ('
 file_string_end   = ').jpg'
 
 
-def smoothTriangle(data, degree):
-    triangle=np.concatenate((np.arange(degree + 1), np.arange(degree)[::-1])) # up then down
-    smoothed=[]
-
-    for i in range(degree, len(data) - degree * 2):
-        point=data[i:i + len(triangle)] * triangle
-        smoothed.append(np.sum(point)/np.sum(triangle))
-    # Handle boundaries
-    smoothed=[smoothed[0]]*int(degree + degree/2) + smoothed
-    while len(smoothed) < len(data):
-        smoothed.append(smoothed[-1])
-    return smoothed
-
-#def func(data, center, eps):
-#    for x,y in data:
-#        if (center-eps < x < center+eps ):
-#            indicator(x,y)=1
-#        else:
-#            indicator(x,y)=0
-#    return indicator
 
 
-for num in range(190):
+for num in range(100):
  filename = file_string_start+str(num)+file_string_end
  initial  = Image.open(filename)
 
 
- init_arr       =  np.array(initial)
+ init_arr       =  np.array(initial)[::10,::10]
 
  gray_image     =  rgb2gray(init_arr)
 
