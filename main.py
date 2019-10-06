@@ -13,15 +13,14 @@ from skimage.color import rgb2gray
 file_string_start = 'C:/Users/dtket/.spyder-py3//Photos/pic ('
 file_string_end   = ').jpg'
 
-
-
-
 for num in range(100):
  filename = file_string_start+str(num)+file_string_end
+ 
  initial  = Image.open(filename)
-
-
- init_arr       =  np.array(initial)[::10,::10]
+ 
+ initial.thumbnail((304,405))
+ 
+ init_arr       =  np.array(initial)
 
  gray_image     =  rgb2gray(init_arr)
 
@@ -37,8 +36,6 @@ for num in range(100):
  
  binary_global2 =  histogram > global_thresh2
  
-# tester=smoothTriangle(histogram, 120)
- 
  camera_center  =  binary_global2.shape[0]/2
 
  track_center   =  ndimage.measurements.center_of_mass(binary_global2)
@@ -48,27 +45,8 @@ for num in range(100):
 
 
 
-
-# Basically do the same but on a reduced set of the pixerls, ie sample every 10 or 130 or sop, we want 30 bins along the x and 10- 30 along the y
-
-
-
-
 ###PLOTTING
-# fig, axes = plt.subplots(nrows=2, figsize=(7, 8))
-# ax0, ax1 = axes
-# plt.gray()
-#
-# ax0.imshow(gray_image)
-# ax0.set_title('Image')
-#
-# ax1.imshow(binary_global)
-# ax1.set_title('Global thresholding')
-#
-#
-# for ax in axes:
-#     ax.axis('off')
-#
+
 # plt.show()
 # plt.gray()
 # plt.imshow(binary_global)
