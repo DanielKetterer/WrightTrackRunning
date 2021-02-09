@@ -5,11 +5,9 @@ Created on Tue Feb  9 13:07:21 2021
 @author: dtket
 """
 
-# -*- coding: utf-8 -*-
-#! /bin/bash
 import numpy as np
 import cv2
-import time
+from datetime import datetime
 
 from gpiozero import Button
 from gpiozero import Motor
@@ -48,9 +46,7 @@ def drive(speed):
 
 def auto_control():
     # initialize the camera and grab a reference
-    camera = PiCamera()
-    camera.resolution = (320, 256) # we can vary this as needed. A rougher image actually helps us
-    camera.framerate = 90 # can also vary
+    # can also vary
     rawCapture = PiRGBArray(camera, size=(320, 256))
     # allow the camera to warmup? try without it
 #    time.sleep(0.1)
@@ -84,35 +80,50 @@ def auto_control():
 
       err = track_center[0] - camera_center
       steer(err)
-      drive(speed)   
-      # send err to actuators, if positive steer right 
+      # send err to actuators,
+      # if positive steer right 
       # if negative steer left
+      
+      # we can adjust speed and time profiles here
+      speed1 = 30
+      speed2 = 20
+      speed3 = 25
+      b=datetime.now()
+      time = (b-a).seconds
+      if time < 10:  # 0 - 10
+       drive(speed1) 
+      elif time < 20:# 10 - 20 
+       drive(speed2) 
+      elif time < 30:# 20 - 30
+       drive(speed3) 
+
       
       
         # bail if the camera stop sending frames.
         # TODO roll your own, this is crude at best!
       if frame==None:
             break
-        # establish a time for the rest of the logic
-
-
 #magic finished
         
 # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
-    # save the last video file before shutting down
-    camera.stop_recording()
-    cv2.destroyAllWindows()
+ 
 
 
      
-# global definitions
+# physical componenet definition
 button = Button(2) #connected to GPIO2
 movement_motor = Motor(forward=4, backward=14) #connected
 steering_motor = Motor(left=7, right=17) #connected
-
+a = datetime.now()
 while True:
-    if button.is_pressed:    
+    if button.is_pressed: 
+     camera = PiCamera()
+     camera.resolution = (320, 256) # we can vary this as needed. A rougher image actually helps us
+     camera.framerate = 90    
      auto_control()
-    else:
-     print("manual")
+     camera.stop_recording()   # save the last video file before shutting down
+     cv2.destroyAllWindows()
+    else: 
+     print("manual control")
+     
