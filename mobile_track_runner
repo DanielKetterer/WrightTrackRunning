@@ -1,0 +1,118 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Feb  9 13:07:21 2021
+
+@author: dtket
+"""
+
+# -*- coding: utf-8 -*-
+#! /bin/bash
+import numpy as np
+import cv2
+import time
+
+from gpiozero import Button
+from gpiozero import Motor
+
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+
+from scipy import ndimage
+from skimage.filters import threshold_otsu
+from skimage.color import rgb2gray
+
+def get_video_filename():
+    return 'test_video.h264'
+# the timestamp when the video write started
+video_time  = 0
+# main logic
+
+def steer(err):
+     #scale the err so it lies between -1 and 1
+     scaled_err = err/128
+     if scaled_err <=0:
+         scaled_err = scaled_err*-1
+         steering_motor.left(scaled_err)
+     else:    
+         steering_motor.right(scaled_err)
+         
+def get_speed():
+    #implement the speed determining algorithm here
+    return 5
+
+
+def drive(speed):
+     current_speed = get_speed()
+     diff = (speed - current_speed)/5    
+     movement_motor.forward(diff)
+
+def auto_control():
+    # initialize the camera and grab a reference
+    camera = PiCamera()
+    camera.resolution = (320, 256) # we can vary this as needed. A rougher image actually helps us
+    camera.framerate = 90 # can also vary
+    rawCapture = PiRGBArray(camera, size=(320, 256))
+    # allow the camera to warmup? try without it
+#    time.sleep(0.1)
+    # start recording using piCamera API
+    camera.start_recording(get_video_filename())
+    # grab one frame at the time from the stream
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        # grab the raw NumPy array representing the image
+      init_arr = frame.array
+#     init_arr       =  np.array(frame)      
+        # TODO add your magic here
+
+      
+      gray_image     =  rgb2gray(init_arr)
+
+      global_thresh  =  threshold_otsu(gray_image)
+
+      binary_global  =  gray_image > global_thresh
+
+      histogram      =  np.sum(binary_global[binary_global.shape[0]//2:,:], axis=0)
+
+      standard       =  np.std(histogram, axis=0)
+
+      global_thresh2 =  threshold_otsu(histogram) + standard
+ 
+      binary_global2 =  histogram > global_thresh2
+ 
+      camera_center  =  binary_global2.shape[0]/2
+
+      track_center   =  ndimage.measurements.center_of_mass(binary_global2)
+
+      err = track_center[0] - camera_center
+      steer(err)
+      drive(speed)   
+      # send err to actuators, if positive steer right 
+      # if negative steer left
+      
+      
+        # bail if the camera stop sending frames.
+        # TODO roll your own, this is crude at best!
+      if frame==None:
+            break
+        # establish a time for the rest of the logic
+
+
+#magic finished
+        
+# clear the stream in preparation for the next frame
+    rawCapture.truncate(0)
+    # save the last video file before shutting down
+    camera.stop_recording()
+    cv2.destroyAllWindows()
+
+
+     
+# global definitions
+button = Button(2) #connected to GPIO2
+movement_motor = Motor(forward=4, backward=14) #connected
+steering_motor = Motor(left=7, right=17) #connected
+
+while True:
+    if button.is_pressed:    
+     auto_control()
+    else:
+     print("manual")
