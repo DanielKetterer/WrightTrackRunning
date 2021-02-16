@@ -3,12 +3,15 @@ GPIO.setmode(GPIO.Board)
 GPIO.setup(12, GPIO.OUT)
 #GPIO.output(12, GPIO.HIGH)
 # loop through 5 times, on/off for 1 second
-for i in range(5):
-    GPIO.output(12,True)
-    time.sleep(1)
-    GPIO.output(12,False)
-    time.sleep(1)
-GPIO.cleanup()
-pwm = GPIO.PWM(12, 1000)
-pwm.start(50)
-GPIO.cleanup()
+try:
+    for i in range(5):
+      GPIO.output(12,True)
+      time.sleep(1)
+      GPIO.output(12,False)
+      time.sleep(1)
+finally:
+    GPIO.cleanup()
+    
+#pwm = GPIO.PWM(12, 1000)
+#pwm.start(50)
+#GPIO.cleanup()
