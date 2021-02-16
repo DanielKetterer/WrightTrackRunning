@@ -1,14 +1,14 @@
 import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18, GPIO.OUT)
-GPIO.output(18, GPIO.HIGH)
+GPIO.setmode(GPIO.Board)
+GPIO.setup(12, GPIO.OUT)
+GPIO.output(12, GPIO.HIGH)
 # loop through 5 times, on/off for 1 second
 for i in range(5):
-    GPIO.output(18,True)
+    GPIO.output(12,True)
     time.sleep(1)
-    GPIO.output(18,False)
+    GPIO.output(12,False)
     time.sleep(1)
 GPIO.cleanup()
-pwm = GPIO.PWM(18, 1000)
+pwm = GPIO.PWM(12, 1000)
 pwm.start(50)
 GPIO.cleanup()
