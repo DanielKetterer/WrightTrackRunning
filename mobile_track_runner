@@ -58,7 +58,7 @@ def auto_control():
 #     init_arr       =  np.array(frame)      
         # TODO add your magic here
       init_arr = frame
-      
+      init_arr = init_arr[::16,::16] #take only each 16th
       gray_image     =  rgb2gray(init_arr)
 
       global_thresh  =  threshold_otsu(gray_image)
