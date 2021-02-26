@@ -1,4 +1,4 @@
-# import the necessary packages
+# import the necessary packages File from https://www.pyimagesearch.com/2015/12/21/increasing-webcam-fps-with-python-and-opencv/
 from __future__ import print_function
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
