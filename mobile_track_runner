@@ -21,16 +21,18 @@ import RPi.GPIO as GPIO
 import time
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(12, GPIO.OUT)
+GPIO.setup(12, GPIO.OUT) #speed control
+GPIO.setup(16, GPIO.OUT) #steering
 GPIO.setup(11 , GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 print ("Waiting for 2 seconds")
 time.sleep(2)
 start = time.time()
 
-servo1 = GPIO.PWM(12,50)
-servo1.start(0)
-
+speedcontroller = GPIO.PWM(12,32)
+speedcontroller.start(0)
+steering = GPIO.PWM(16,32)
+steering.start(0)
 def get_video_filename():
     return 'test_video.h264'
 # the timestamp when the video write started
@@ -49,24 +51,24 @@ def InterruptHandler(channel):
     # Magnet
     end = time.time()
     T = end - start
-    speed = (2*3.14159*3)/T # in cm per second
+    speed = (2*3.14159*3)/(44.704*T) # in cm per second
     print("Magnet detected, Sensor LOW")
-    print("Speed " + str(speed)+" cm/sec")
+    print("Speed " + str(speed)+" mph")
     start = time.time()
 def steer(err,camera_center):
 
 #start PWM running, but with value of 0 (pulse off)
-#      servo1.start(0)
+#      speedcontroller.start(0)
 #      incoming err is from -320 to 320
-      #We want scaled error to be between 2 and 12
-# so 0 maps to 7, -320 maps to 2 and 320 maps to 12
+      #We want scaled error to be between 3 and 5
+# so 0 maps to 4, -320 maps to 3 and 320 maps to 5
 #    0         7  -20 maps to 2  and 20 maps to 12
 #there is 64 per each unit mapped with 7 as constant:
-     scale_factor = camera_center/5
-     scaled_err = (err/scale_factor+7)
+     scale_factor = 32
+     scaled_err = (err/scale_factor+4)
 #      binary_global2.shape[0]/10 
-     
-     servo1.ChangeDutyCycle(scaled_err)
+#      time.sleep(.1)
+     steering.ChangeDutyCycle(scaled_err)
 #      print(scaled_err)      
 
 def auto_control():
@@ -114,16 +116,22 @@ camera.framerate = 90
 rawCapture = PiRGBArray(camera, size=(640, 480))
 time.sleep(0.1)
 InterruptHandler(11)
-GPIO.add_event_detect(11, GPIO.BOTH, callback=InterruptHandler, bouncetime=200)
+GPIO.add_event_detect(11, GPIO.FALLING, callback=InterruptHandler, bouncetime=1)
 speed = 0
+speedcontroller.ChangeDutyCycle(5)
 while True:
      try:   
       auto_control()
      except KeyboardInterrupt:
+      speedcontroller.stop()
+      steering.stop()
       camera.stop_recording()    
       GPIO.cleanup()
       print("Goodbye")
      finally:
+      speedcontroller.stop()
+      steering.stop()
       camera.stop_recording()   # save the last video file before shutting down
       GPIO.cleanup()
       print("Goodbye")
+      
